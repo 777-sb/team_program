@@ -23,5 +23,6 @@
         FROM vocabulary_record vr
         LEFT JOIN vocabulary v ON v.vocabulary_id = vr.vocabulary_id
         WHERE vr.user_id = #{userId}
+        ORDER BY vr.record_time DESC
     </select>
 </mapper>

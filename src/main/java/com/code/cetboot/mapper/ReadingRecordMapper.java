@@ -21,7 +21,8 @@ public interface ReadingRecordMapper extends BaseMapper<ReadingRecord> {
             "rp.title, rp.exercise_count " +
             "FROM reading_record rr " +
             "LEFT JOIN reading_practice rp ON rr.reading_practice_id = rp.reading_practice_id " +
-            "WHERE rr.user_id = #{userId} ")
+            "WHERE rr.user_id = #{userId} " +
+            "ORDER BY rr.record_time DESC")
     Page<ReadingRecordsVO> selectReadingRecordByUserId(Page<ReadingRecordsVO> page,@Param("userId") Integer userId);
 }
 

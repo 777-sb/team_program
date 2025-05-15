@@ -21,7 +21,8 @@ public interface ListeningRecordMapper extends BaseMapper<ListeningRecord> {
             " lp.title, lp.exercise_count " +
             "FROM listening_record lr " +
             "LEFT JOIN listening_practice lp ON lr.listening_practice_id = lp.listening_practice_id " +
-            "WHERE lr.user_id = #{userId} ")
+            "WHERE lr.user_id = #{userId} " +
+            "ORDER BY lr.record_time DESC")
     Page<ListeningRecordsVO> selectListeningRecordByUserId(Page<ListeningRecordsVO> page,@Param("userId") Integer userId);
 }
 
