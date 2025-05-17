@@ -19,4 +19,12 @@
         ORDER BY RAND()
         LIMIT #{count}
     </select>
+    <insert id="insertBatch">
+        INSERT INTO `vocabulary` (word, meaning)
+        VALUES
+        <foreach collection="vocabularyList" item="item" separator=",">
+            (#{item.word}, #{item.meaning})
+        </foreach>
+        ON DUPLICATE KEY UPDATE vocabulary_id = vocabulary_id
+    </insert>
 </mapper>

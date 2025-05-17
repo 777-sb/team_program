@@ -25,4 +25,11 @@ public interface ExerciseService extends IService<Exercise> {
      * @return 练习记录列表
      */
     List<ExerciseRecord> checkExercises(List<ExerciseVO> answerList, List<ExerciseDTO> exercises, Integer recordType, AtomicInteger correctCount);
+
+    /**
+     * 添加练习题
+     * @param exercise 练习题
+     * @param selections 选项列表
+     */
+    void addExercise(Exercise exercise, List<String> selections);
 }

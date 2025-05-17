@@ -23,6 +23,14 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
      * @return 随机查询到的词汇列表
      */
     List<Vocabulary> selectBatchRandom(@Param("count") int count);
+
+    /**
+     * 批量插入词汇, 如果词汇已存在则跳过
+     *
+     * @param vocabularyList 词汇列表
+     * @return 插入成功的数量
+     */
+    int insertBatch(@Param("vocabularyList") List<Vocabulary> vocabularyList);
 }
 
 

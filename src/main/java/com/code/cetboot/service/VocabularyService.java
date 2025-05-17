@@ -2,6 +2,7 @@ package com.code.cetboot.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.code.cetboot.bean.Result;
+import com.code.cetboot.dto.AddVocabularyDTO;
 import com.code.cetboot.dto.VocabularyPracticeDTO;
 import com.code.cetboot.entity.Vocabulary;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -36,4 +37,11 @@ public interface VocabularyService extends IService<Vocabulary> {
      * @return Result
      */
     Result getRecords(Page<VocabularyRecordsVO> pageDto);
+
+    /**
+     * 根据ID获取词汇记录
+     * @param addVocabularyDTOList 词汇记录列表
+     * @return Result
+     */
+    Result add(List<AddVocabularyDTO> addVocabularyDTOList);
 }

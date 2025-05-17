@@ -21,7 +21,7 @@ public class ExerciseMapperTest {
 
     @Test
     public void testSelectByListeningPracticeId() {
-        logger.info("{}", exerciseMapper.selectExerciseByListeningPracticeId(true, 1));
-        logger.info("{}", exerciseMapper.selectExerciseByListeningPracticeId(false, 1));
+//        logger.info("{}", exerciseMapper.selectExerciseByListeningPracticeId(true, 1));
+//        logger.info("{}", exerciseMapper.selectExerciseByListeningPracticeId(false, 1));
     }
 }

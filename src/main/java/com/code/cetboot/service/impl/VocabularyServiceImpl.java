@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.code.cetboot.bean.PageResult;
 import com.code.cetboot.bean.Result;
+import com.code.cetboot.dto.AddVocabularyDTO;
 import com.code.cetboot.dto.VocabularyPracticeDTO;
 import com.code.cetboot.entity.Vocabulary;
 import com.code.cetboot.entity.VocabularyRecord;
@@ -16,6 +17,7 @@ import com.code.cetboot.vo.vocabulary.VocabularyRecordsVO;
 import com.code.cetboot.vo.vocabulary.VocabularyVO;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -120,6 +122,24 @@ public class VocabularyServiceImpl extends ServiceImpl<VocabularyMapper, Vocabul
             return Result.success("获取词汇学习记录成功", PageResult.of(records));
         }
         return Result.fail("获取词汇学习记录失败");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result add(List<AddVocabularyDTO> addVocabularyDTOList) {
+        List<Vocabulary> vocabularyList = addVocabularyDTOList.stream()
+                .map(addVocabularyDTO -> {
+                    Vocabulary vocabulary = new Vocabulary();
+                    vocabulary.setWord(addVocabularyDTO.getWord());
+                    vocabulary.setMeaning(addVocabularyDTO.getMeaning());
+                    return vocabulary;
+                }).collect(Collectors.toList());
+
+        int inserted = baseMapper.insertBatch(vocabularyList);
+        if (inserted == vocabularyList.size()) {
+            return Result.success("添加词汇成功");
+        }
+        return Result.fail("添加词汇失败");
     }
 }
 

@@ -7,17 +7,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.code.cetboot.bean.PageResult;
 import com.code.cetboot.bean.Result;
 import com.code.cetboot.constant.RecordType;
+import com.code.cetboot.dto.AddExerciseDTO;
+import com.code.cetboot.dto.AddReadingDTO;
 import com.code.cetboot.dto.ExerciseDTO;
 import com.code.cetboot.dto.ReadingPracticeDTO;
-import com.code.cetboot.entity.ExerciseRecord;
-import com.code.cetboot.entity.ReadingPractice;
-import com.code.cetboot.entity.ReadingRecord;
+import com.code.cetboot.entity.*;
+import com.code.cetboot.exception.ServiceException;
 import com.code.cetboot.mapper.ExerciseMapper;
 import com.code.cetboot.mapper.ReadingRecordMapper;
 import com.code.cetboot.service.ExerciseRecordService;
 import com.code.cetboot.service.ExerciseService;
 import com.code.cetboot.service.ReadingPracticeService;
 import com.code.cetboot.mapper.ReadingPracticeMapper;
+import com.code.cetboot.service.ReadingToExerciseService;
 import com.code.cetboot.vo.ExerciseVO;
 import com.code.cetboot.vo.reading.ReadingPracticeVO;
 import com.code.cetboot.vo.reading.ReadingRecordVO;
@@ -51,6 +53,9 @@ public class ReadingPracticeServiceImpl extends ServiceImpl<ReadingPracticeMappe
 
     @Resource
     private ExerciseService exerciseService;
+
+    @Resource
+    private ReadingToExerciseService readingToExerciseService;
 
     @Override
     public Result getPractices(Page<ReadingPractice> pageDto, String keyword) {
@@ -158,6 +163,49 @@ public class ReadingPracticeServiceImpl extends ServiceImpl<ReadingPracticeMappe
         List<ExerciseVO> exerciseVOS = exerciseMapper.selectExerciseByReadingPracticeId(needAnswer, readingPracticeId);
         readingPracticeVO.setExercises(exerciseVOS);
         return readingPracticeVO;
+    }
+
+    @Override
+    public Result add(AddReadingDTO addReadingDTO) {
+        // 检查练习题的答案 id 是否合法
+        List<@Valid AddExerciseDTO> exercises = addReadingDTO.getExercises();
+        exercises.forEach(exercise -> {
+            Integer answerSelectionId = exercise.getAnswerSelectionId();
+            if (answerSelectionId == null || answerSelectionId >= exercise.getSelections().size() || answerSelectionId < 0) {
+                throw new ServiceException("添加练习题失败，正确答案选项id不合法");
+            }
+        });
+
+        // 设置练习题内容
+        ReadingPractice readingPractice = new ReadingPractice();
+        readingPractice.setTitle(addReadingDTO.getTitle());
+        readingPractice.setContent(addReadingDTO.getContent());
+        readingPractice.setExerciseCount(exercises.size());
+        boolean isSaved = this.save(readingPractice);
+        if (!isSaved) {
+            throw new ServiceException("保存练习题失败");
+        }
+
+        // 插入练习题
+        Integer readingPracticeId = readingPractice.getReadingPracticeId();
+        List<ReadingToExercise> rteList = exercises.stream()
+                .map(addExerciseDTO -> {
+                    Exercise exercise = new Exercise();
+                    exercise.setContent(addExerciseDTO.getContent());
+                    exercise.setAnswerSelectionId(addExerciseDTO.getAnswerSelectionId());
+                    exerciseService.addExercise(exercise, addExerciseDTO.getSelections());
+                    ReadingToExercise rte = new ReadingToExercise();
+                    rte.setReadingPracticeId(readingPracticeId);
+                    rte.setExerciseId(exercise.getExerciseId());
+                    return rte;
+                }).collect(Collectors.toList());
+        // 插入中间表
+        isSaved = readingToExerciseService.saveBatch(rteList);
+        if (!isSaved) {
+            throw new ServiceException("添加练习题失败");
+        }
+        readingPractice.setContent(null);
+        return Result.success("添加阅读练习成功", readingPractice);
     }
 }
 

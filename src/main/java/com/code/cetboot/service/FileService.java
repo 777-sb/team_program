@@ -18,9 +18,10 @@ public interface FileService extends IService<File> {
      *
      * @param file 文件
      * @param fileName 文件名
+     * @param type 文件类型
      * @return 结果
      */
-    Result uploadFile(MultipartFile file, String fileName) throws Exception;
+    Result uploadFile(MultipartFile file, String fileName, Integer type) throws Exception;
 
     /**
      * 分页查询文件

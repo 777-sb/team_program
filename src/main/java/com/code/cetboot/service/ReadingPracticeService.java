@@ -2,6 +2,7 @@ package com.code.cetboot.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.code.cetboot.bean.Result;
+import com.code.cetboot.dto.AddReadingDTO;
 import com.code.cetboot.dto.ReadingPracticeDTO;
 import com.code.cetboot.entity.ReadingPractice;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -54,4 +55,11 @@ public interface ReadingPracticeService extends IService<ReadingPractice> {
      * @return 阅读记录详情
      */
     Result getRecord(Integer readingRecordId);
+
+    /**
+     * 添加阅读练习题
+     * @param addReadingDTO 阅读练习题数据传输对象
+     * @return 添加结果
+     */
+    Result add(AddReadingDTO addReadingDTO);
 }

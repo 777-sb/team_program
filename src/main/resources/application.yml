@@ -7,7 +7,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    url: jdbc:mysql://localhost:3306/cet_boot
+    url: jdbc:mysql://localhost:3306/cet_boot?rewriteBatchedStatements=true
     hikari:
       minimum-idle: 3
       auto-commit: true
@@ -21,6 +21,9 @@ spring:
     redis:
       key-prefix: cetboot
       use-key-prefix: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
 
 logging:
   file:
@@ -53,6 +56,9 @@ sa-token:
 
 file:
   filePath: E:\cetboot\file\
+  audioPath: E:\cetboot\audio\
 
 # 文件访问地址
-webPath: /file/download/
+webPath:
+  file: /file/download/
+  audio: /audio/

@@ -2,10 +2,10 @@ package com.code.cetboot.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.code.cetboot.bean.Result;
+import com.code.cetboot.dto.AddListeningDTO;
 import com.code.cetboot.dto.ListeningPracticeDTO;
 import com.code.cetboot.entity.ListeningPractice;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.code.cetboot.vo.listening.ListeningPracticeVO;
 import com.code.cetboot.vo.listening.ListeningRecordsVO;
 
 /**
@@ -55,4 +55,11 @@ public interface ListeningPracticeService extends IService<ListeningPractice> {
      * @return Result
      */
     Result getRecord(Integer listeningRecordId);
+
+    /**
+     * 添加听力练习题
+     * @param addListeningDTO 添加听力练习题DTO
+     * @return Result
+     */
+    Result add(AddListeningDTO addListeningDTO);
 }

@@ -1,11 +1,15 @@
 package com.code.cetboot.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.code.cetboot.bean.Result;
+import com.code.cetboot.constant.Role;
+import com.code.cetboot.dto.AddListeningDTO;
 import com.code.cetboot.dto.ListeningPracticeDTO;
 import com.code.cetboot.entity.ListeningPractice;
 import com.code.cetboot.service.ListeningPracticeService;
+import com.code.cetboot.validation.AddListeningDTOValidation;
 import com.code.cetboot.validation.ListeningPracticeValidation;
 import com.code.cetboot.vo.listening.ListeningRecordsVO;
 import org.springframework.validation.annotation.Validated;
@@ -62,5 +66,15 @@ public class ListeningController {
             @RequestParam Integer listeningRecordId
     ) {
         return listeningService.getRecord(listeningRecordId);
+    }
+
+    @PostMapping("/add")
+    @SaCheckLogin
+    @SaCheckRole({Role.ADMIN_STRING})
+    public Result add(
+            @Validated(AddListeningDTOValidation.class)
+            @RequestBody AddListeningDTO addListeningDTO
+    ) {
+        return listeningService.add(addListeningDTO);
     }
 }

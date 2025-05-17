@@ -7,17 +7,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.code.cetboot.bean.PageResult;
 import com.code.cetboot.bean.Result;
 import com.code.cetboot.constant.RecordType;
+import com.code.cetboot.dto.AddExerciseDTO;
+import com.code.cetboot.dto.AddListeningDTO;
 import com.code.cetboot.dto.ExerciseDTO;
 import com.code.cetboot.dto.ListeningPracticeDTO;
-import com.code.cetboot.entity.ExerciseRecord;
-import com.code.cetboot.entity.ListeningPractice;
-import com.code.cetboot.entity.ListeningRecord;
+import com.code.cetboot.entity.*;
+import com.code.cetboot.exception.ServiceException;
 import com.code.cetboot.mapper.ExerciseMapper;
 import com.code.cetboot.mapper.ListeningRecordMapper;
 import com.code.cetboot.service.ExerciseRecordService;
 import com.code.cetboot.service.ExerciseService;
 import com.code.cetboot.service.ListeningPracticeService;
 import com.code.cetboot.mapper.ListeningPracticeMapper;
+import com.code.cetboot.service.ListeningToExerciseService;
 import com.code.cetboot.vo.ExerciseVO;
 import com.code.cetboot.vo.listening.ListeningPracticeVO;
 import com.code.cetboot.vo.listening.ListeningRecordVO;
@@ -52,6 +54,9 @@ public class ListeningPracticeServiceImpl extends ServiceImpl<ListeningPracticeM
 
     @Resource
     private ExerciseService exerciseService;
+
+    @Resource
+    private ListeningToExerciseService listeningToExerciseService;
 
     @Override
     public Result getPractices(Page<ListeningPractice> pageDto, String keyword) {
@@ -169,6 +174,52 @@ public class ListeningPracticeServiceImpl extends ServiceImpl<ListeningPracticeM
         List<ExerciseVO> exerciseVOS = exerciseMapper.selectExerciseByListeningPracticeId(needAnswer, listeningPracticeId);
         listeningPracticeVO.setExercises(exerciseVOS);
         return listeningPracticeVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result add(AddListeningDTO addListeningDTO) {
+        // 检查练习题的答案 id 是否合法
+        List<@Valid AddExerciseDTO> exercises = addListeningDTO.getExercises();
+        exercises.forEach(exercise -> {
+            Integer answerSelectionId = exercise.getAnswerSelectionId();
+            if (answerSelectionId == null || answerSelectionId >= exercise.getSelections().size() || answerSelectionId < 0) {
+                throw new ServiceException("添加练习题失败，正确答案选项id不合法");
+            }
+        });
+
+        // 设置练习题内容
+        ListeningPractice listeningPractice = new ListeningPractice();
+        listeningPractice.setTitle(addListeningDTO.getTitle());
+        listeningPractice.setAudio(addListeningDTO.getAudio());
+        listeningPractice.setExerciseCount(exercises.size());
+        boolean isSaved = this.save(listeningPractice);
+        if (!isSaved) {
+            throw new ServiceException("保存练习题失败");
+        }
+
+        // 插入练习题
+        Integer listeningPracticeId = listeningPractice.getListeningPracticeId();
+        // 保存中间表项
+        List<ListeningToExercise> lteList = exercises.stream()
+                .map(addExerciseDTO -> {
+                    Exercise exercise = new Exercise();
+                    exercise.setContent(addExerciseDTO.getContent());
+                    exercise.setAnswerSelectionId(addExerciseDTO.getAnswerSelectionId());
+                    exerciseService.addExercise(exercise, addExerciseDTO.getSelections());
+                    ListeningToExercise lte = new ListeningToExercise();
+                    lte.setExerciseId(exercise.getExerciseId());
+                    lte.setListeningPracticeId(listeningPracticeId);
+                    return lte;
+                })
+                .collect(Collectors.toList());
+        // 插入中间表
+        isSaved = listeningToExerciseService.saveBatch(lteList);
+        if (!isSaved) {
+            throw new ServiceException("保存练习失败");
+        }
+
+        return Result.success("添加听力练习成功", listeningPractice);
     }
 }
 

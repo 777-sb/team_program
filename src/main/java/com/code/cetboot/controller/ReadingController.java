@@ -1,11 +1,15 @@
 package com.code.cetboot.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.code.cetboot.bean.Result;
+import com.code.cetboot.constant.Role;
+import com.code.cetboot.dto.AddReadingDTO;
 import com.code.cetboot.dto.ReadingPracticeDTO;
 import com.code.cetboot.entity.ReadingPractice;
 import com.code.cetboot.service.ReadingPracticeService;
+import com.code.cetboot.validation.AddReadingDTOValidation;
 import com.code.cetboot.validation.ReadingPracticeValidation;
 import com.code.cetboot.vo.reading.ReadingRecordsVO;
 import org.springframework.validation.annotation.Validated;
@@ -62,5 +66,14 @@ public class ReadingController {
             @RequestParam Integer readingRecordId
     ) {
         return readingService.getRecord(readingRecordId);
+    }
+
+    @PostMapping("/add")
+    @SaCheckRole({Role.ADMIN_STRING})
+    public Result add(
+            @Validated({AddReadingDTOValidation.class})
+            @RequestBody AddReadingDTO addReadingDTO
+    ) {
+        return readingService.add(addReadingDTO);
     }
 }

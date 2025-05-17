@@ -26,29 +26,39 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File>
     @Value("${file.filePath}")
     private String filePath;
 
-    @Value("${webPath}")
-    private String webPath;
+    @Value("${file.audioPath}")
+    private String audioPath;
+
+    @Value("${webPath.file}")
+    private String fileWebPath;
+
+    @Value("${webPath.audio}")
+    private String audioWebPath;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
     @Override
-    public Result uploadFile(MultipartFile file, String fileName) throws Exception {
-        java.io.File fileFolder = new java.io.File(filePath);
+    public Result uploadFile(MultipartFile file, String fileName, Integer type) throws Exception {
+        String path = type == 0 ? filePath : audioPath;
+        String webPath = type == 0 ? fileWebPath : audioWebPath;
+        java.io.File fileFolder = new java.io.File(path);
         if (!fileFolder.exists()){
             fileFolder.mkdirs();
         }
         String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         String name = UUID.randomUUID().toString().replaceAll("-", "") + ext;
-        String fileSavePath = filePath + name;
+        String fileSavePath = path + name;
         java.io.File toFile = FileUtil.multipartFileToFile(file, fileSavePath);
         File fileInfo = new File();
         fileInfo.setName(fileName);
         fileInfo.setSrc(contextPath + webPath + name);
-        boolean saved = save(fileInfo);
-        if (!saved){
-            toFile.delete();
-            return Result.fail("文件上传失败");
+        if (type == 0) {
+            boolean saved = save(fileInfo);
+            if (!saved){
+                toFile.delete();
+                return Result.fail("文件上传失败");
+            }
         }
         return Result.success("文件上传成功", fileInfo);
     }

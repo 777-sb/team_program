@@ -28,9 +28,19 @@ public class FileController {
     @SaCheckRole({Role.ADMIN_STRING})
     public Result upload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("fileName") String fileName
+            @RequestParam("fileName") String fileName,
+            @RequestParam("type") Integer type
     ) throws Exception {
-        return fileService.uploadFile(file, fileName);
+        if (file == null || file.isEmpty()) {
+            return Result.fail("文件不能为空");
+        }
+        if (fileName == null || fileName.isEmpty()) {
+            return Result.fail("文件名不能为空");
+        }
+        if (type == null) {
+            return Result.fail("文件类型不能为空");
+        }
+        return fileService.uploadFile(file, fileName, type);
     }
 
     @GetMapping("/search")
